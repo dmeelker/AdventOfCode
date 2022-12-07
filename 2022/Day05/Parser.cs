@@ -1,6 +1,6 @@
 ﻿namespace AoC
 {
-    public record PuzzleInput(string[][] Stacks, IEnumerable<MoveOperation> Operations);
+    public record PuzzleInput(Stack<string>[] Stacks, IEnumerable<MoveOperation> Operations);
     public record MoveOperation(int Quantity, int From, int To);
 
     internal class Parser
@@ -15,7 +15,7 @@
             );
         }
 
-        private string[][] ParseStacks(string input)
+        private Stack<string>[] ParseStacks(string input)
         {
             var lines = input.Split(Environment.NewLine);
             var stackCount = (lines.Last().Length / 4) + 1;
@@ -25,16 +25,16 @@
                 .ToArray();
         }
 
-        private string[] ParseStack(string[] lines, int stackIndex)
+        private Stack<string> ParseStack(string[] lines, int stackIndex)
         {
             var columnIndex = (stackIndex * 4) + 1;
             var maxDepth = lines.Length - 1;
 
-            return
+            return new(
                 Enumerable.Range(0, maxDepth)
-                .Select(depth => lines[depth][columnIndex].ToString())
-                .Where(value => value != " ")
-                .ToArray();
+                    .Select(depth => lines[depth][columnIndex].ToString())
+                    .Where(value => value != " ")
+            );
         }
 
         private IEnumerable<MoveOperation> ParseOperations(string input)
