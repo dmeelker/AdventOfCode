@@ -6,10 +6,10 @@ namespace Shared
     [DebuggerDisplay("{X},{Y}")]
     public record Point(int X, int Y);
 
-    public class Grid<T>
+    public class Grid<T> where T : IEquatable<T>
     {
         [DebuggerDisplay("{Location} = {Value}")]
-        public class CellReference<T2>
+        public class CellReference<T2> where T2 : IEquatable<T2>
         {
             public Grid<T2> Grid { get; private set; }
             public Point Location { get; private set; }
@@ -30,15 +30,21 @@ namespace Shared
         }
 
         private T[,] _data;
-        private T _defaultValue;
+        public T DefaultValue { get; set; } = default!;
 
         public int Width => _data.GetLength(0);
         public int Height => _data.GetLength(1);
 
-        public Grid(int width, int height, T defaultValue)
+        public Grid(T[,] data, T defaultValue = default!)
+        {
+            _data = data;
+            DefaultValue = defaultValue;
+        }
+
+        public Grid(int width, int height, T defaultValue = default!)
         {
             _data = new T[width, height];
-            _defaultValue = defaultValue;
+            DefaultValue = defaultValue;
             Clear(defaultValue);
         }
 
@@ -141,6 +147,47 @@ namespace Shared
             }
         }
 
+        public IEnumerable<CellReference<T>> Edges()
+        {
+            return AllCells()
+                .Where(cell => cell.Location.X == 0 || cell.Location.Y == 0 || cell.Location.X == Width - 1 || cell.Location.Y == Height - 1);
+        }
+
+        public IEnumerable<CellReference<T>> Flood(Point location)
+        {
+            var floodValue = Get(location);
+            var closed = new HashSet<Point>();
+            var open = new Queue<Point>();
+            open.Enqueue(location);
+
+            while (open.Count > 0)
+            {
+                var currentLocation = open.Dequeue();
+                closed.Add(currentLocation);
+
+                if (Get(currentLocation).Equals(floodValue))
+                {
+                    yield return new(this, currentLocation);
+                    Consider(new(currentLocation.X - 1, currentLocation.Y));
+                    Consider(new(currentLocation.X + 1, currentLocation.Y));
+                    Consider(new(currentLocation.X, currentLocation.Y - 1));
+                    Consider(new(currentLocation.X, currentLocation.Y + 1));
+                }
+            }
+
+            void Consider(Point p)
+            {
+                if (!Contains(p))
+                    return;
+
+                if (closed.Contains(p))
+                    return;
+
+                if (!open.Contains(p))
+                    open.Enqueue(p);
+            }
+        }
+
         public string Visualize()
         {
             var result = new StringBuilder();
@@ -165,7 +212,7 @@ namespace Shared
         public void Grow(int size)
         {
             var newData = new T[Width + (size * 2), Height + (size * 2)];
-            ClearArray(newData, _defaultValue);
+            ClearArray(newData, DefaultValue);
 
             for (var y = 0; y < Height; y++)
             {
