@@ -1,12 +1,40 @@
 ﻿using Shared;
+using Shared.Dijkstra;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
 namespace Solution
 {
-    record Path(Point startLocation, List<SearchNode> steps);
+    public class HeightNode : IEquatable<HeightNode>
+    {
+        public Point Location;
+        public char Height;
+
+        public HeightNode(Point location, char height)
+        {
+            Location = location;
+            Height = height;
+        }
+
+        public override int GetHashCode()
+        {
+            return Location.GetHashCode();
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (obj == null) return false;
+            if (obj is HeightNode node) return node.Location.Equals(Location);
+            return false;
+        }
+
+        public bool Equals(HeightNode? other)
+        {
+            if (other == null) return false;
+            return Location.Equals(other.Location);
+        }
+    }
 
     public class Program
     {
@@ -29,8 +57,9 @@ namespace Solution
         {
             var startLocation = input.AllCells().First(cell => cell.Value == 'S').Location;
             var path = FindPath(input, startLocation);
-            return path.steps.Count - 1;
+            return path!.Steps.Count - 1;
         }
+
         public static int Part2(Grid<char> input)
         {
             var startLocations = input.AllCells()
@@ -42,128 +71,33 @@ namespace Solution
                 .AsParallel()
                 .Select((l, i) => FindPath(input, l.Location))
                 .Where(path => path != null)
-                .OrderBy(path => path.steps.Count)
+                .OrderBy(path => path!.Steps.Count)
                 .First()
-                .steps.Count - 1;
+                .Steps.Count - 1;
         }
 
-        private static Path? FindPath(Grid<char> input, Point startLocation)
+        private static Path<HeightNode>? FindPath(Grid<char> input, Point startLocation)
         {
-            var arr = new SearchNode[input.Width, input.Height];
-            for (var x = 0; x < input.Width; x++)
-            {
-                for (var y = 0; y < input.Height; y++)
-                {
-                    arr[x, y] = new SearchNode()
-                    {
-                        Location = new Point(x, y),
-                        Height = input.Get(x, y),
-                        Distance = int.MaxValue,
-                        Visited = false
-                    };
-                }
-            }
-
-            var grid = new Grid<SearchNode>(arr);
+            var grid = input.Map(cell => new SearchNode<HeightNode>(new(cell.Location, cell.Value)));
 
             var startNode = grid.Get(startLocation);
-            var endNode = grid.AllCells().First(cell => cell.Value.Height == 'E').Value;
+            var endNode = grid.AllCells().First(cell => cell.Value.Value.Height == 'E').Value;
 
-            grid.AllCells().First(c => c.Value.Height == 'S').Value.Height = 'a';
+            startNode.Value.Height = 'a';
+            endNode.Value.Height = 'z';
 
-            startNode.Distance = 0;
-            endNode.Height = 'z';
+            var searcher = new DijkstraSearcher<HeightNode>(
+                grid.AllCells().Select(cell => cell.Value),
+                startNode,
+                endNode,
+                (node) =>
+                    grid.Neighbours(node.Value.Location, false)
+                        .Select(cell => cell.Value)
+                        .Where(n => n.Value.Height - node.Value.Height <= 1),
+                (from, to) => 1
+                );
 
-            var closed = new HashSet<SearchNode>();
-            var open = new List<SearchNode>();
-
-
-            open.AddRange(grid.AllCells().Select(cell => cell.Value));
-            open.Sort((node1, node2) => node1.Distance.CompareTo(node2.Distance));
-
-
-            while (open.Count > 0)
-            {
-                var currentNode = open[0];
-                if (currentNode.Distance == int.MaxValue)
-                    break;
-
-                var changes = false;
-
-                open.RemoveAt(0);
-
-                var neighbours = grid.Neighbours(currentNode.Location, false)
-                    .Where(n => !closed.Contains(n.Value))
-                    .Where(n => n.Value.Height - currentNode.Height <= 1).ToList();
-
-                foreach (var neighbour in neighbours)
-                {
-                    var newDistance = currentNode.Distance + 1;
-                    if (newDistance < neighbour.Value.Distance)
-                    {
-                        neighbour.Value.Distance = newDistance;
-                        neighbour.Value.Source = currentNode;
-                        changes = true;
-                    }
-                }
-
-                closed.Add(currentNode);
-                if (currentNode.Equals(endNode))
-                {
-                    break;
-                }
-
-                if (changes)
-                    open = open.Where(n => n.Distance != int.MaxValue)
-                        .OrderBy(n => n.Distance)
-                        .Concat(open.Where(n => n.Distance == int.MaxValue))
-                        .ToList();
-            }
-
-            if (endNode.Source == null)
-            {
-                // No Path
-                return null;
-            }
-
-            var path = new List<SearchNode>();
-            {
-                var currentNode = endNode;
-                while (currentNode != null)
-                {
-                    path.Add(currentNode);
-                    currentNode = currentNode.Source;
-                }
-
-                path.Reverse();
-            }
-
-            return new(startLocation, path);
-        }
-    }
-
-    class SearchNode : IEquatable<SearchNode>
-    {
-        public Point Location { get; set; }
-        public char Height { get; set; }
-        public bool Visited { get; set; }
-        public int Distance { get; set; } = int.MaxValue;
-        public SearchNode? Source { get; set; } = null;
-
-        public override int GetHashCode()
-        {
-            return Location.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj is SearchNode node) return node.Location.Equals(Location);
-            return false;
-        }
-
-        public bool Equals(SearchNode other)
-        {
-            return Location.Equals(other.Location);
+            return searcher.FindPath();
         }
     }
 }

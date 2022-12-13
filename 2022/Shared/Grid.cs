@@ -4,7 +4,12 @@ using System.Text;
 namespace Shared
 {
     [DebuggerDisplay("{X},{Y}")]
-    public record Point(int X, int Y);
+    public record Point(int X, int Y)
+    {
+        public Point Add(Point other) => new Point(X + other.X, Y + other.Y);
+        public Point Subtract(Point other) => new(X - other.X, Y - other.Y);
+        public int ManhattanDistance => Math.Abs(X) + Math.Abs(Y);
+    }
 
     public class Grid<T> where T : IEquatable<T>
     {
@@ -32,8 +37,8 @@ namespace Shared
         private T[,] _data;
         public T DefaultValue { get; set; } = default!;
 
-        public int Width => _data.GetLength(0);
-        public int Height => _data.GetLength(1);
+        public int Width => _data.GetLength(1);
+        public int Height => _data.GetLength(0);
 
         public Grid(T[,] data, T defaultValue = default!)
         {
@@ -43,7 +48,7 @@ namespace Shared
 
         public Grid(int width, int height, T defaultValue = default!)
         {
-            _data = new T[width, height];
+            _data = new T[height, width];
             DefaultValue = defaultValue;
             Clear(defaultValue);
         }
@@ -56,7 +61,22 @@ namespace Shared
             {
                 for (var y = 0; y < Height; y++)
                 {
-                    clone._data[x, y] = _data[x, y];
+                    clone.Set(x, y, Get(x, y));
+                }
+            }
+
+            return clone;
+        }
+
+        public Grid<T2> Map<T2>(Func<CellReference<T>, T2> mapping) where T2 : IEquatable<T2>
+        {
+            var clone = new Grid<T2>(Width, Height, default!);
+
+            for (var x = 0; x < Width; x++)
+            {
+                for (var y = 0; y < Height; y++)
+                {
+                    clone.Set(x, y, mapping(new(this, new(x, y))));
                 }
             }
 
@@ -70,11 +90,11 @@ namespace Shared
 
         private void ClearArray(T[,] arr, T value)
         {
-            for (var x = 0; x < arr.GetLength(0); x++)
+            for (var x = 0; x < arr.GetLength(1); x++)
             {
-                for (var y = 0; y < arr.GetLength(1); y++)
+                for (var y = 0; y < arr.GetLength(0); y++)
                 {
-                    arr[x, y] = value;
+                    arr[y, x] = value;
                 }
             }
         }
@@ -87,7 +107,7 @@ namespace Shared
         public T Get(Point location)
         {
             VerifyPointInBounds(location);
-            return _data[location.X, location.Y];
+            return _data[location.Y, location.X];
         }
 
         public void Set(int x, int y, T value) => Set(new(x, y), value);
@@ -95,7 +115,7 @@ namespace Shared
         public void Set(Point location, T value)
         {
             VerifyPointInBounds(location);
-            _data[location.X, location.Y] = value;
+            _data[location.Y, location.X] = value;
         }
 
         private void VerifyPointInBounds(Point point)
@@ -196,7 +216,7 @@ namespace Shared
             {
                 for (var x = 0; x < Width; x++)
                 {
-                    result.Append(_data[x, y]);
+                    result.Append(Get(x, y));
 
                     if (x < Width - 1)
                     {
@@ -218,7 +238,7 @@ namespace Shared
             {
                 for (var x = 0; x < Width; x++)
                 {
-                    newData[x + size, y + size] = _data[x, y];
+                    newData[y + size, x + size] = _data[y, x];
                 }
             }
 
