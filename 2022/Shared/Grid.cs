@@ -6,8 +6,15 @@ namespace Shared
     [DebuggerDisplay("{X},{Y}")]
     public record Point(int X, int Y)
     {
+        public static readonly Point Up = new Point(0, -1);
+        public static readonly Point Down = new Point(0, 1);
+        public static readonly Point Left = new Point(-1, 0);
+        public static readonly Point Right = new Point(1, 0);
+
         public Point Add(Point other) => new Point(X + other.X, Y + other.Y);
         public Point Subtract(Point other) => new(X - other.X, Y - other.Y);
+        public Point Sign() => new(Math.Sign(X), Math.Sign(Y));
+
         public int ManhattanDistance => Math.Abs(X) + Math.Abs(Y);
     }
 
@@ -220,7 +227,7 @@ namespace Shared
 
                     if (x < Width - 1)
                     {
-                        result.Append(",");
+                        //result.Append(",");
                     }
                 }
                 result.AppendLine();
