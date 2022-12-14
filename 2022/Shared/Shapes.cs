@@ -2,7 +2,7 @@
 {
     public static class Shapes
     {
-        public static IEnumerable<Point> OrthogonalLine(Point start, Point end)
+        public static IEnumerable<Point> Line(Point start, Point end)
         {
             var direction = end.Subtract(start).Sign();
             var location = start;
@@ -14,6 +14,17 @@
                 location = location.Add(direction);
                 yield return location;
             } while (location != end);
+        }
+
+        public static IEnumerable<Point> Rect(Point start, Point size)
+        {
+            for (var y = 0; y < size.Y; y++)
+            {
+                for (var x = 0; x < size.X; x++)
+                {
+                    yield return new(start.X + x, start.Y + y);
+                }
+            }
         }
     }
 }

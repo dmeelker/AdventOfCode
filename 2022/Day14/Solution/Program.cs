@@ -92,12 +92,9 @@ namespace Solution
 
             foreach (var path in paths)
             {
-                var from = path.Points[0];
-
-                foreach (var point in path.Points.Skip(1))
+                foreach (var points in path.Points.SlidingWindow(2))
                 {
-                    DrawRock(field, from, point);
-                    from = point;
+                    DrawRock(field, points[0], points[1]);
                 }
             }
 
@@ -112,7 +109,7 @@ namespace Solution
 
         public static void DrawRock(Dictionary<Point, char> field, Point start, Point end)
         {
-            foreach (var location in Shapes.OrthogonalLine(start, end))
+            foreach (var location in Shapes.Line(start, end))
             {
                 field.TryAdd(location, '#');
             }
