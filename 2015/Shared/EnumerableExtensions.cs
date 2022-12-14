@@ -17,5 +17,20 @@
                 input.Skip(halfSize)
             };
         }
+
+        public static IEnumerable<T[]> SlidingWindow<T>(this IEnumerable<T> input, int windowSize)
+        {
+            var values = input.ToArray();
+
+            if (values.Length < windowSize)
+            {
+                throw new ArgumentException("Size is less than window size");
+            }
+
+            for (var i = 0; i < values.Length - windowSize + 1; i++)
+            {
+                yield return values[i..(i + windowSize)];
+            }
+        }
     }
 }
