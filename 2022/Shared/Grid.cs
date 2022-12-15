@@ -16,6 +16,11 @@ namespace Shared
         public Point Sign() => new(Math.Sign(X), Math.Sign(Y));
 
         public int ManhattanDistance => Math.Abs(X) + Math.Abs(Y);
+
+        public override string ToString()
+        {
+            return $"{X},{Y}";
+        }
     }
 
     public class Grid<T> where T : IEquatable<T>
