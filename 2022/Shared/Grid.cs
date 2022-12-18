@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Shared
 {
-    [DebuggerDisplay("{X},{Y}")]
+    [DebuggerDisplay("{X}, {Y}")]
     public record Point(int X, int Y)
     {
         public static readonly Point Up = new Point(0, -1);
@@ -19,9 +19,12 @@ namespace Shared
 
         public override string ToString()
         {
-            return $"{X},{Y}";
+            return $"{X}, {Y}";
         }
     }
+
+    [DebuggerDisplay("{X}, {Y} {Width}x{Height}")]
+    public record Rect(int X, int Y, int Width, int Height);
 
     public class Grid<T> where T : IEquatable<T>
     {
@@ -185,6 +188,30 @@ namespace Shared
                 .Where(cell => cell.Location.X == 0 || cell.Location.Y == 0 || cell.Location.X == Width - 1 || cell.Location.Y == Height - 1);
         }
 
+        public IEnumerable<CellReference<T>> Rectangle(Point location, Point size)
+        {
+            for (var y = location.Y; y < location.Y + size.Y; y++)
+            {
+                for (var x = location.X; x < location.X + size.X; x++)
+                {
+                    var currentLocation = new Point(x, y);
+
+                    if (Contains(currentLocation))
+                    {
+                        yield return new(this, currentLocation);
+                    }
+                }
+            }
+        }
+
+        public IEnumerable<CellReference<T>> Line(int y)
+        {
+            for (var x = 0; x < Width; x++)
+            {
+                yield return new(this, new(x, y));
+            }
+        }
+
         public IEnumerable<CellReference<T>> Flood(Point location)
         {
             var floodValue = Get(location);
@@ -255,6 +282,32 @@ namespace Shared
             }
 
             _data = newData;
+        }
+
+        public void Copy(Grid<T> target, Rect source, Point destination)
+        {
+            for (var y = source.Y; y < source.Y + source.Height; y++)
+            {
+                for (var x = source.X; x < source.X + source.Width; x++)
+                {
+                    target.Set(destination.X + x - source.X, destination.Y + y - source.Y, Get(x, y));
+                }
+            }
+        }
+
+        public Grid<T> Copy(Rect rect)
+        {
+            var result = new Grid<T>(rect.Width, rect.Height, DefaultValue);
+
+            for (var y = rect.Y; y < rect.Y + rect.Height; y++)
+            {
+                for (var x = rect.X; x < rect.X + rect.Width; x++)
+                {
+                    result.Set(x - rect.X, y - rect.Y, Get(x, y));
+                }
+            }
+
+            return result;
         }
     }
 }
