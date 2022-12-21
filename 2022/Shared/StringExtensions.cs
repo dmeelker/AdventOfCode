@@ -21,5 +21,7 @@
         {
             return str.Split(",", StringSplitOptions.RemoveEmptyEntries).Select(int.Parse).ToArray();
         }
+
+        public static bool IsNumber(this string str) => str.ToArray().All(char.IsDigit);
     }
 }
