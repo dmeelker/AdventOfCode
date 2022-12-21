@@ -1,5 +1,4 @@
 ﻿using Shared;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,14 +9,12 @@ namespace Solution
         public Point Location { get; set; }
         public Point BeaconLocation { get; set; }
         public int Range { get; private set; }
-        public Point Corner { get; private set; }
 
         public Sensor(Point location, Point beaconLocation)
         {
             Location = location;
             BeaconLocation = beaconLocation;
             Range = beaconLocation.Subtract(Location).ManhattanDistance;
-            Corner = location.Subtract(new(-Range, -Range));
         }
 
         public bool IsInRange(Point location)
@@ -25,30 +22,6 @@ namespace Solution
             var distance = location.Subtract(Location).ManhattanDistance;
 
             return distance <= Range;
-        }
-
-        public void Visualize()
-        {
-            var minX = Location.X - Range;
-            var maxX = Location.X + Range;
-            var minY = Location.Y - Range;
-            var maxY = Location.Y + Range;
-
-            for (var y = minY; y <= maxY; y++)
-            {
-                for (var x = minX; x <= maxX; x++)
-                {
-                    if (IsInRange(new(x, y)))
-                    {
-                        Console.Write("#");
-                    }
-                    else
-                    {
-                        Console.Write(".");
-                    }
-                }
-                Console.WriteLine();
-            }
         }
     }
 
