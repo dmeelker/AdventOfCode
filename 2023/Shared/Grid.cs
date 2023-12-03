@@ -153,6 +153,22 @@ namespace Shared
             }
         }
 
+        public IEnumerable<IEnumerable<CellReference<T>>> Rows()
+        {
+            for (var y = 0; y < Height; y++)
+            {
+                yield return Row(y);
+            }
+        }
+
+        public IEnumerable<CellReference<T>> Row(int y)
+        {
+            for (var x = 0; x < Width; ++x)
+            {
+                yield return new(this, new Point(x, y));
+            }
+        }
+
         public IEnumerable<CellReference<T>> Neighbours(Point location, bool includeDiagonals = true)
         {
             for (var x = -1; x < 2; x++)
@@ -178,6 +194,26 @@ namespace Shared
         {
             return AllCells()
                 .Where(cell => cell.Location.X == 0 || cell.Location.Y == 0 || cell.Location.X == Width - 1 || cell.Location.Y == Height - 1);
+        }
+
+        public IEnumerable<CellReference<T>> RectangleOutline(Rect rect)
+        {
+            for (var x = rect.X; x < rect.X + rect.Width; ++x)
+            {
+                for (var y = rect.Y; y < rect.Y + rect.Height; ++y)
+                {
+                    if (!(x == rect.X || x == rect.X + rect.Width - 1 || y == rect.Y || y == rect.Y + rect.Height - 1))
+                    {
+                        continue;
+                    }
+
+                    var location = new Point(x, y);
+                    if (Contains(location))
+                    {
+                        yield return new(this, location);
+                    }
+                }
+            }
         }
 
         public IEnumerable<CellReference<T>> Flood(Point location)
