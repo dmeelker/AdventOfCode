@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33110.190
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tests", "Tests\Tests.csproj", "{8C365387-00D9-4C7E-A48E-074F916D38E3}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Solution", "Solution\Solution.csproj", "{6CD6A88C-0C32-4CB8-90A6-078EF1EF700D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "..\Shared\Shared.csproj", "{A7F05803-D6BA-432F-BEBC-D1CC31D271F0}"
@@ -13,6 +15,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8C365387-00D9-4C7E-A48E-074F916D38E3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C365387-00D9-4C7E-A48E-074F916D38E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C365387-00D9-4C7E-A48E-074F916D38E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C365387-00D9-4C7E-A48E-074F916D38E3}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6CD6A88C-0C32-4CB8-90A6-078EF1EF700D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6CD6A88C-0C32-4CB8-90A6-078EF1EF700D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6CD6A88C-0C32-4CB8-90A6-078EF1EF700D}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -14,8 +14,27 @@ namespace Shared
         public Point Add(Point other) => new Point(X + other.X, Y + other.Y);
         public Point Subtract(Point other) => new(X - other.X, Y - other.Y);
         public Point Sign() => new(Math.Sign(X), Math.Sign(Y));
+        public Point Multiply(int scalar) => new(X * scalar, Y * scalar);
 
         public int ManhattanDistance => Math.Abs(X) + Math.Abs(Y);
+
+        public Point Rotate(double radians)
+        {
+            var cos = Math.Cos(radians);
+            var sin = Math.Sin(radians);
+
+            return new(
+               (int)((X * cos) - (Y * sin)),
+                (int)((X * sin) + (Y * cos)));
+        }
+
+        public Point ToUnit()
+        {
+            var length = Length;
+            return new((int)(X / length), (int)(Y / length));
+        }
+
+        public double Length => Math.Sqrt((X * X) + (Y * Y));
 
         public override string ToString()
         {
@@ -26,10 +45,10 @@ namespace Shared
     [DebuggerDisplay("{X}, {Y} {Width}x{Height}")]
     public record Rect(int X, int Y, int Width, int Height);
 
-    public class Grid<T> where T : IEquatable<T>
+    public class Grid<T> //where T : IEquatable<T>
     {
         [DebuggerDisplay("{Location} = {Value}")]
-        public class CellReference<T2> where T2 : IEquatable<T2>
+        public class CellReference<T2> // where T2 : IEquatable<T2>
         {
             public Grid<T2> Grid { get; private set; }
             public Point Location { get; private set; }
@@ -70,7 +89,7 @@ namespace Shared
 
         public Grid<T> Clone()
         {
-            var clone = new Grid<T>(Width, Height, default!);
+            var clone = new Grid<T>(Width, Height, DefaultValue);
 
             for (var x = 0; x < Width; x++)
             {
@@ -204,11 +223,29 @@ namespace Shared
             }
         }
 
-        public IEnumerable<CellReference<T>> Line(int y)
+        public IEnumerable<CellReference<T>> Line(int y) => Row(y);
+
+        public IEnumerable<CellReference<T>> Row(int y)
         {
             for (var x = 0; x < Width; x++)
             {
                 yield return new(this, new(x, y));
+            }
+        }
+
+        public IEnumerable<CellReference<T>> Column(int x)
+        {
+            for (var y = 0; y < Height; y++)
+            {
+                yield return new(this, new(x, y));
+            }
+        }
+
+        public IEnumerable<IEnumerable<CellReference<T>>> Rows()
+        {
+            for (var y = 0; y < Height; y++)
+            {
+                yield return Row(y);
             }
         }
 
@@ -270,7 +307,7 @@ namespace Shared
 
         public void Grow(int size)
         {
-            var newData = new T[Width + (size * 2), Height + (size * 2)];
+            var newData = new T[Height + (size * 2), Width + (size * 2)];
             ClearArray(newData, DefaultValue);
 
             for (var y = 0; y < Height; y++)

@@ -84,9 +84,63 @@ namespace Solution
 
         public static int Part2(List<ValveRoom> input)
         {
-            return 0;
+            var root = BuildModel(input, out var allNodes);
+
+            var distances = new NodeDistances(allNodes);
+            var nodesToVisit = allNodes.Where(node => node != root && node.FlowRate > 0).ToArray();
+
+            var seeker1Path = new List<Node>();
+            var seeker1 = FindMaximumFlowRate2(root, new(), new(nodesToVisit), 0, 0, 0, seeker1Path, distances);
+            nodesToVisit = nodesToVisit.Where(node => !seeker1Path.Contains(node)).ToArray();
+
+            var seeker2Path = new List<Node>();
+            var seeker2 = FindMaximumFlowRate2(root, new(), new(nodesToVisit), 0, 0, 0, seeker2Path, distances);
+            return seeker1 + seeker2;
         }
 
+        public static int FindMaximumFlowRate2(Node currentNode, Stack<Node> currentPath, HashSet<Node> unvisitedNodes, int pathFlowRate, int minutesPassed, int maxFoundFlowRate, List<Node> maxPath, NodeDistances distances)
+        {
+            if (minutesPassed >= 26)
+            {
+                return Math.Max(pathFlowRate, maxFoundFlowRate);
+            }
+
+            var options = unvisitedNodes.ToArray();
+
+            if (options.Length == 0 && pathFlowRate > maxFoundFlowRate)
+            {
+                maxFoundFlowRate = pathFlowRate;
+                maxPath.Clear();
+                maxPath.AddRange(currentPath);
+                return maxFoundFlowRate;
+            }
+
+            foreach (var option in options)
+            {
+                var distance = distances.GetDistance(currentNode, option);
+                var timeWhenValveIsOpened = minutesPassed + distance + 1;
+                var timeLeftWhenValveIsOpened = 26 - timeWhenValveIsOpened;
+                unvisitedNodes.Remove(option);
+
+                currentPath.Push(option);
+                var result = FindMaximumFlowRate2(
+                    option,
+                    currentPath,
+                    unvisitedNodes,
+                    pathFlowRate + (option.FlowRate * timeLeftWhenValveIsOpened),
+                    timeWhenValveIsOpened,
+                    maxFoundFlowRate,
+                    maxPath,
+                    distances);
+
+                maxFoundFlowRate = Math.Max(maxFoundFlowRate, result);
+                currentPath.Pop();
+
+                unvisitedNodes.Add(option);
+            }
+
+            return Math.Max(maxFoundFlowRate, pathFlowRate);
+        }
 
         public static Node BuildModel(IEnumerable<ValveRoom> entries, out List<Node> allNodes)
         {
