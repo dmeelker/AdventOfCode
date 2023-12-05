@@ -62,5 +62,24 @@
                 yield return groupValues.ToArray();
             }
         }
+
+        public static IEnumerable<Tuple<T, T>> ToPairs<T>(this IEnumerable<T> values)
+        {
+            var index = 0;
+            var firstValue = default(T);
+
+            foreach (var value in values)
+            {
+                if (index % 2 == 0)
+                {
+                    firstValue = value;
+                }
+                else
+                {
+                    yield return new Tuple<T, T>(firstValue!, value);
+                }
+                index++;
+            }
+        }
     }
 }
