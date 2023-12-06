@@ -13,11 +13,6 @@ namespace Solution
     public record Range(long Start, long Length)
     {
         public long End => Start + Length - 1;
-        public bool Intersects(Range other)
-        {
-            return !(Start >= other.End ||
-                End < other.Start);
-        }
 
         public Range[] Split(long index)
         {
@@ -36,16 +31,12 @@ namespace Solution
 
             if (other.Start > Start)
             {
-                var tail = parts[^1];
-                parts.Remove(tail);
-                parts.AddRange(tail.Split(other.Start));
+                parts.AddRange(parts.RemoveLast().Split(other.Start));
             }
 
             if (other.End < End)
             {
-                var tail = parts[^1];
-                parts.Remove(tail);
-                parts.AddRange(tail.Split(other.Start + other.Length));
+                parts.AddRange(parts.RemoveLast().Split(other.Start + other.Length));
             }
 
             var overlap = parts.Where(p => p.Intersects(other)).Single();
@@ -54,20 +45,9 @@ namespace Solution
             return new IntersectionResult(overlap, remainder);
         }
 
-        public bool Contains(long value)
-        {
-            return value >= Start && value <= Start + Length;
-        }
-
-        public bool Contains(Range other)
-        {
-            return other.Start >= Start && other.Start + other.Length <= Start + Length;
-        }
-
-        public Range Transpose(long amount)
-        {
-            return new Range(Start + amount, Length);
-        }
+        public bool Intersects(Range other) => !(Start >= other.End || End < other.Start);
+        public bool Contains(long value) => value >= Start && value <= Start + Length;
+        public Range Transpose(long amount) => new Range(Start + amount, Length);
     };
 
     public record IntersectionResult(Range Intersection, Range[] Remainder);
