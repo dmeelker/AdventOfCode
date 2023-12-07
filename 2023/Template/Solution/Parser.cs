@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Shared;
 
-namespace Solution
+namespace Solution;
+
+public static class Parser
 {
-    public static class Parser
+    public static string[] ParseInput(string input)
     {
-        public static string[] ParseInput(string input)
-        {
-            return input.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-        }
+        return input.ToLines();
     }
 }
