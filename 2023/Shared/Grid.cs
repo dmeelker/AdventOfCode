@@ -15,6 +15,11 @@ namespace Shared
         public Point Subtract(Point other) => new(X - other.X, Y - other.Y);
         public Point Sign() => new(Math.Sign(X), Math.Sign(Y));
 
+        public Point Multiply(int v)
+        {
+            return new Point(X * v, Y * v);
+        }
+
         public int ManhattanDistance => Math.Abs(X) + Math.Abs(Y);
     }
 
@@ -207,6 +212,21 @@ namespace Shared
                         continue;
                     }
 
+                    var location = new Point(x, y);
+                    if (Contains(location))
+                    {
+                        yield return new(this, location);
+                    }
+                }
+            }
+        }
+
+        public IEnumerable<CellReference<T>> Rectangle(Rect rect)
+        {
+            for (var x = rect.X; x < rect.X + rect.Width; ++x)
+            {
+                for (var y = rect.Y; y < rect.Y + rect.Height; ++y)
+                {
                     var location = new Point(x, y);
                     if (Contains(location))
                     {
