@@ -14,6 +14,7 @@ namespace Shared
         public Point Add(Point other) => new Point(X + other.X, Y + other.Y);
         public Point Subtract(Point other) => new(X - other.X, Y - other.Y);
         public Point Sign() => new(Math.Sign(X), Math.Sign(Y));
+        public int ManhattanDistanceTo(Point other) => Subtract(other).ManhattanDistance;
 
         public Point Multiply(int v)
         {
@@ -169,6 +170,22 @@ namespace Shared
         public IEnumerable<CellReference<T>> Row(int y)
         {
             for (var x = 0; x < Width; ++x)
+            {
+                yield return new(this, new Point(x, y));
+            }
+        }
+
+        public IEnumerable<IEnumerable<CellReference<T>>> Columns()
+        {
+            for (var x = 0; x < Width; ++x)
+            {
+                yield return Column(x);
+            }
+        }
+
+        public IEnumerable<CellReference<T>> Column(int x)
+        {
+            for (var y = 0; y < Height; ++y)
             {
                 yield return new(this, new Point(x, y));
             }
