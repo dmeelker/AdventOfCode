@@ -175,6 +175,22 @@ namespace Shared
             }
         }
 
+        public IEnumerable<IEnumerable<T>> RowValues()
+        {
+            for (var y = 0; y < Height; y++)
+            {
+                yield return RowValues(y);
+            }
+        }
+
+        public IEnumerable<T> RowValues(int y)
+        {
+            for (var x = 0; x < Width; ++x)
+            {
+                yield return Get(x, y);
+            }
+        }
+
         public IEnumerable<IEnumerable<CellReference<T>>> Columns()
         {
             for (var x = 0; x < Width; ++x)
@@ -188,6 +204,22 @@ namespace Shared
             for (var y = 0; y < Height; ++y)
             {
                 yield return new(this, new Point(x, y));
+            }
+        }
+
+        public IEnumerable<IEnumerable<T>> ColumnValues()
+        {
+            for (var x = 0; x < Width; ++x)
+            {
+                yield return ColumnValues(x);
+            }
+        }
+
+        public IEnumerable<T> ColumnValues(int x)
+        {
+            for (var y = 0; y < Height; ++y)
+            {
+                yield return Get(x, y);
             }
         }
 
@@ -323,6 +355,23 @@ namespace Shared
             }
 
             _data = newData;
+        }
+
+        public static Grid<char> ParseCharGrid(IEnumerable<string> lines)
+        {
+            var chars = lines.Select(line => line.ToCharArray()).ToArray();
+
+            var grid = new Grid<char>(chars[0].Length, chars.Length);
+
+            for (var x = 0; x < grid.Width; x++)
+            {
+                for (var y = 0; y < grid.Height; y++)
+                {
+                    grid.Set(x, y, chars[y][x]);
+                }
+            }
+
+            return grid;
         }
     }
 }
