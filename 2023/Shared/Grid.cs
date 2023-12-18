@@ -341,20 +341,19 @@ namespace Shared
             return result.ToString();
         }
 
-        public void Grow(int size)
+        public Grid<T> Grow(int size)
         {
-            var newData = new T[Width + (size * 2), Height + (size * 2)];
-            ClearArray(newData, DefaultValue);
+            var newData = new Grid<T>(Width + (size * 2), Height + (size * 2), DefaultValue);
 
             for (var y = 0; y < Height; y++)
             {
                 for (var x = 0; x < Width; x++)
                 {
-                    newData[y + size, x + size] = _data[y, x];
+                    newData.Set(x + size, y + size, Get(x, y));
                 }
             }
 
-            _data = newData;
+            return newData;
         }
 
         public static Grid<char> ParseCharGrid(IEnumerable<string> lines)
