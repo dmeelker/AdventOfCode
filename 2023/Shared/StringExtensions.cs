@@ -2,9 +2,15 @@
 {
     public static class StringExtensions
     {
+
         public static string StripPrefix(this string str, string prefix)
         {
             return str.Substring(prefix.Length);
+        }
+
+        public static string StripPostfix(this string str, string postfix)
+        {
+            return str.Substring(0, str.Length - postfix.Length);
         }
 
         public static string[] ToSections(this string str) => str.Split(Environment.NewLine + Environment.NewLine);

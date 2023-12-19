@@ -18,6 +18,20 @@
             if (other == null) return false;
             return Value!.Equals(other.Value);
         }
+
+        public IEnumerable<SearchNode<T>> TraceBack(int maxSteps)
+        {
+            var current = this;
+            var steps = 0;
+
+            while (current != null && steps < maxSteps)
+            {
+                yield return current;
+
+                current = current.Source;
+                steps++;
+            }
+        }
     }
 
     public class DijkstraSearcher<T> where T : class

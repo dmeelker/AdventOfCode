@@ -372,5 +372,22 @@ namespace Shared
 
             return grid;
         }
+
+        public static Grid<int> ParseIntGrid(IEnumerable<string> lines)
+        {
+            var chars = lines.Select(line => line.ToCharArray()).ToArray();
+
+            var grid = new Grid<int>(chars[0].Length, chars.Length);
+
+            for (var x = 0; x < grid.Width; x++)
+            {
+                for (var y = 0; y < grid.Height; y++)
+                {
+                    grid.Set(x, y, int.Parse(chars[y][x].ToString()));
+                }
+            }
+
+            return grid;
+        }
     }
 }
