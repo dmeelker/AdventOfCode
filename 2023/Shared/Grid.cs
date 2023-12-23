@@ -22,6 +22,11 @@ namespace Shared
         }
 
         public int ManhattanDistance => Math.Abs(X) + Math.Abs(Y);
+
+        public override string ToString()
+        {
+            return $"{X},{Y}";
+        }
     }
 
     public class Grid<T> where T : IEquatable<T>
