@@ -7,13 +7,6 @@ using System.Linq;
 
 namespace Solution;
 
-public class Node : SearchNode<Point>
-{
-    public Node(Point value) : base(value)
-    {
-    }
-}
-
 public class Program
 {
     static void Main(string[] args)
@@ -27,37 +20,28 @@ public class Program
 
     public static int Part1(Grid<int> input)
     {
-        var map = ToNodeGrid(input);
-        var allNodes = map.AllCells().Select(c => c.Value).ToArray();
-        var startNode = allNodes.First(n => n.Value == new Point(0, 0));
-        var endNode = allNodes.First(n => n.Value == new Point(input.Width - 1, input.Height - 1));
+        var allNodes = input.AllCells().Select(c => c.Location).ToArray();
+        var startNode = allNodes.First(n => n == new Point(0, 0));
+        var endNode = allNodes.First(n => n == new Point(input.Width - 1, input.Height - 1));
 
-        var searcher = new DijkstraSearcher<Point>(
-            allNodes,
-            startNode,
-            endNode,
+        var searcher = new DijkstraSearcher2<Point>(
             node =>
             {
-
-                return map.Neighbours(node.Value, false).Select(cell => cell.Value);
+                return input.Neighbours(node.Value, false)
+                    .Where(cell => !IsStraightLine(node, cell.Location))
+                    .Select(cell => cell.Location);
             },
-            (from, to) =>
-            {
-                if (IsStraightLine(from, to))
-                    return 1000;
-
-                return input.Get(to.Value);
-            }
+            (from, to) => input.Get(to.Value)
         );
 
-        var path = searcher.FindPath();
+        var path = searcher.FindPath(startNode, endNode, allNodes);
 
         Print(input, path!);
 
-        return path!.Steps.Skip(1).Sum(n => input.Get(n.Value));
+        return path!.Skip(1).Sum(n => input.Get(n));
     }
 
-    private static bool IsStraightLine(SearchNode<Point> from, SearchNode<Point> to)
+    private static bool IsStraightLine(DijkstraSearcher2<Point>.Node from, Point to)
     {
         //var locations = from.TraceBack(3)
         //    .Reverse()
@@ -65,17 +49,17 @@ public class Program
         //    .Union(new[] { to.Value })
         //    .ToArray(); ;
 
-        if (from.Source == null || from.Source.Source == null)
+        if (from.Source == null || from.Source.Source == null || from.Source.Source.Source == null)
             return false;
 
-        var locations = new[] { from.Source.Source.Value, from.Source.Value, from.Value, to.Value };
+        var locations = new[] { from.Source.Source.Source.Value, from.Source.Source.Value, from.Source.Value, from.Value, to };
 
         return locations.All(l => l.X == locations[0].X) || locations.All(l => l.Y == locations[0].Y);
     }
 
-    private static void Print(Grid<int> input, Path<Point> path)
+    private static void Print(Grid<int> input, List<Point> path)
     {
-        var pathLocations = path.Steps.Select(n => n.Value).ToHashSet();
+        var pathLocations = path.ToHashSet();
 
         for (var y = 0; y < input.Height; y++)
         {
