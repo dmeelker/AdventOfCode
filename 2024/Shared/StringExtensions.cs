@@ -14,7 +14,7 @@
         }
 
         public static string[] ToSections(this string str) => str.Split(Environment.NewLine + Environment.NewLine);
-        public static string[] ToLines(this string str) => str.Split(Environment.NewLine);
+        public static string[] ToLines(this string str, bool skipEmpty = false) => str.Split(Environment.NewLine, skipEmpty ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None);
         public static long ParseLong(this string str) => long.Parse(str.Trim());
         public static int ParseInt(this string str) => int.Parse(str.Trim());
 

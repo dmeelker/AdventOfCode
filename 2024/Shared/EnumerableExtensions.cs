@@ -81,5 +81,10 @@
                 index++;
             }
         }
+
+        public static int CountDistinct<T>(this IEnumerable<T> values)
+        {
+            return values.Distinct().Count();
+        }
     }
 }
