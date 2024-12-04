@@ -153,14 +153,19 @@ namespace Shared
             }
         }
 
-        public IEnumerable<CellReference<T>> Path(Point start, Point step)
+        public IEnumerable<CellReference<T>> Path(Point start, Point step, int? maxSteps = null)
         {
             Point location = start;
+            int steps = 0;
 
             while (Contains(location))
             {
                 yield return new(this, location);
                 location = new(location.X + step.X, location.Y + step.Y);
+
+                steps++;
+                if (maxSteps.HasValue && steps >= maxSteps.Value)
+                    break;
             }
         }
 

@@ -62,5 +62,19 @@
             result = default;
             return false;
         }
+
+        public static string Reverse(this string input)
+        {
+            var charArray = input.ToCharArray();
+            Array.Reverse(charArray);
+            return new string(charArray);
+        }
+
+        public static bool EqualsBothWays(this string input, string other, StringComparison comparison = StringComparison.OrdinalIgnoreCase)
+        {
+            return
+                input.Equals(other, comparison) ||
+                input.Reverse().Equals(other, comparison);
+        }
     }
 }
