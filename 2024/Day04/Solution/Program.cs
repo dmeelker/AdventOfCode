@@ -25,27 +25,24 @@ public class Program
     {
         return input.AllCells()
             .Sum(cell =>
-            {
-                return new string[] {
-                    GetStringFromCells(input, cell.Location, new Point(1, 0), 4), // Right
-                    GetStringFromCells(input, cell.Location, new Point(0, 1), 4), // Down
-                    GetStringFromCells(input, cell.Location, new Point(-1, 1), 4), // BottomLeft
-                    GetStringFromCells(input, cell.Location, new Point(1, 1), 4), // BottomRight
-                }.Where(w => w.EqualsBothWays("XMAS")).Count();
-            });
+                new string[] {
+                    GetStringFromCells(input, cell.Location, Point.Right, 4),
+                    GetStringFromCells(input, cell.Location, Point.Down, 4),
+                    GetStringFromCells(input, cell.Location, Point.DownLeft, 4),
+                    GetStringFromCells(input, cell.Location, Point.DownRight, 4),
+                }.Count(w => w.EqualsBothWays("XMAS"))
+            );
     }
 
     public static int Part2(Grid<char> input)
     {
         return input.AllCells()
-            .Where(cell =>
-            {
-                return new string[] {
-                    GetStringFromCells(input, cell.Location.Add(new Point(-1, -1)), new Point(1, 1), 3),
-                    GetStringFromCells(input, cell.Location.Add(new Point(1, -1)), new Point(-1, 1), 3),
-                }.All(w => w.EqualsBothWays("MAS"));
-            })
-            .Count();
+            .Count(cell =>
+                new string[] {
+                    GetStringFromCells(input, cell.Location + Point.UpLeft, Point.DownRight, 3),
+                    GetStringFromCells(input, cell.Location + Point.UpRight, Point.DownLeft, 3),
+                }.All(w => w.EqualsBothWays("MAS"))
+            );
     }
 
     private static string GetStringFromCells(Grid<char> grid, Point start, Point direction, int maxSteps)
